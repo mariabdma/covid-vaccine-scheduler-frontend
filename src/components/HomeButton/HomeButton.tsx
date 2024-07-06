@@ -1,11 +1,18 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { ButtonContainer, ButtonText } from "./styles";
 
-const HomeButton: React.FC = () => {
+interface HomeButtonProps {
+  to: string;
+  children: React.ReactNode;
+}
+const HomeButton: React.FC<HomeButtonProps> = ({ to, children }) => {
   return (
-    <ButtonContainer>
-      <ButtonText>Faça um agendamento para a vacina COVID-19</ButtonText>
-    </ButtonContainer>
+    <Link to={to}>
+      <ButtonContainer>
+        <ButtonText>{children}</ButtonText>
+      </ButtonContainer>
+    </Link>
   );
 };
 

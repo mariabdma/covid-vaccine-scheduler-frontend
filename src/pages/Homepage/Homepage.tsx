@@ -24,7 +24,9 @@ export default function Homepage(): JSX.Element {
       </Header>
       <Content>
         <Section>
-          <HomeButton />
+          <HomeButton to="/schedule">
+            Agende uma consulta de vacinação COVID 19
+          </HomeButton>
         </Section>
         <Section>
           <CalendarTitle>
