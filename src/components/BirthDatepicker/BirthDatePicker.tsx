@@ -1,17 +1,35 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
-const BirthDatePicker: React.FC<{ onChange: (date: Date) => void }> = ({
+interface BirthDatePickerProps {
+  value: Date | null;
+  onChange: (date: Date | null) => void;
+}
+
+const BirthDatePicker: React.FC<BirthDatePickerProps> = ({
+  value,
   onChange,
 }) => {
   const [day, setDay] = useState<number | null>(null);
   const [month, setMonth] = useState<number | null>(null);
   const [year, setYear] = useState<number | null>(null);
 
+  useEffect(() => {
+    if (value) {
+      setDay(value.getDate());
+      setMonth(value.getMonth() + 1);
+      setYear(value.getFullYear());
+    } else {
+      setDay(null);
+      setMonth(null);
+      setYear(null);
+    }
+  }, [value]);
+
   const handleDayChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const dayValue = parseInt(e.target.value, 10);
     setDay(dayValue);
     if (dayValue && month && year) {
-      onChange(new Date(year, month - 1, dayValue)); // month - 1 because months are zero-indexed in JavaScript Date
+      onChange(new Date(year, month - 1, dayValue));
     }
   };
 
@@ -19,7 +37,7 @@ const BirthDatePicker: React.FC<{ onChange: (date: Date) => void }> = ({
     const monthValue = parseInt(e.target.value, 10);
     setMonth(monthValue);
     if (day && monthValue && year) {
-      onChange(new Date(year, monthValue - 1, day)); // monthValue - 1 because months are zero-indexed in JavaScript Date
+      onChange(new Date(year, monthValue - 1, day));
     }
   };
 
@@ -27,7 +45,7 @@ const BirthDatePicker: React.FC<{ onChange: (date: Date) => void }> = ({
     const yearValue = parseInt(e.target.value, 10);
     setYear(yearValue);
     if (day && month && yearValue) {
-      onChange(new Date(yearValue, month - 1, day)); // month - 1 because months are zero-indexed in JavaScript Date
+      onChange(new Date(yearValue, month - 1, day));
     }
   };
 

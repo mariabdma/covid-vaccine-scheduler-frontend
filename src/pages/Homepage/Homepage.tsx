@@ -29,11 +29,9 @@ export default function Homepage(): JSX.Element {
           </HomeButton>
         </Section>
         <Section>
-          <CalendarTitle>
-            {" "}
-            Verifique as consultas agendadas por data e horário.{" "}
-          </CalendarTitle>
-          <DatePicker inline />
+          <HomeButton to="/appointments">
+            Consulte os agendamentos de vacinação COVID 19
+          </HomeButton>
         </Section>
       </Content>
     </Container>

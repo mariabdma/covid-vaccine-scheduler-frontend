@@ -6,7 +6,7 @@ export default function SchedulePage(): JSX.Element {
   return (
     <Container>
       <SchedulerTitle> Preencha os dados para agendamento: </SchedulerTitle>
-      <ScheduleForm></ScheduleForm>;
+      <ScheduleForm></ScheduleForm>
     </Container>
   );
 }
