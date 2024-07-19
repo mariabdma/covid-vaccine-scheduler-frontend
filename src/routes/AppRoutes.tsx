@@ -1,8 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Homepage from "../pages/Homepage";
-import SchedulePage from "../pages/SchedulePage";
-import AppointmentsPage from "../pages/AppointmentsPage";
+import { Homepage, SchedulePage, AppointmentsPage } from "../pages";
 
 const AppRoutes: React.FC = () => {
   return (
