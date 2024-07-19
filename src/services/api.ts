@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:5000/api", // Replace with your actual back-end API URL
+  baseURL: "http://localhost:5000/api",
 });
 
 export const scheduleAppointment = async (appointmentData: any) => {
@@ -18,10 +18,10 @@ export const fetchAvailableHours = async (date: Date) => {
   try {
     const response = await api.get("/appointments/available-hours", {
       params: {
-        date: date.toISOString().split("T")[0], // Format date as YYYY-MM-DD
+        date: date.toISOString().split("T")[0],
       },
     });
-    return response.data; // Assuming the response.data is an array of available hours
+    return response.data;
   } catch (error) {
     console.error("Error fetching available hours:", error);
     throw error;

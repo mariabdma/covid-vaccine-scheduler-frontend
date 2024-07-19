@@ -11,7 +11,7 @@ import {
 import { getAppointments } from "../../services/api";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import AppointmentCard from "../../components/AppointmentCard";
+import { AppointmentCard } from "../../components";
 
 interface Appointment {
   id: number;
@@ -37,7 +37,6 @@ const AppointmentsPage: React.FC = () => {
     const fetchAppointments = async () => {
       try {
         const data = await getAppointments();
-        // Sort appointments by date and time
         const sortedAppointments = data.sort(
           (a: Appointment, b: Appointment) => {
             const aDateTime = new Date(
@@ -74,7 +73,6 @@ const AppointmentsPage: React.FC = () => {
           locale: ptBR,
         })
       );
-      // Combine scheduleDate and scheduleTime to create a Date object
       const appointmentDateTime = new Date(
         `${appointment.scheduleDate}T${appointment.scheduleTime}`
       );
@@ -117,7 +115,9 @@ const AppointmentsPage: React.FC = () => {
                 <h3>{day}</h3>
                 {Object.entries(times).map(([time, appointmentsAtTime]) => (
                   <AppointmentTimeGroup key={time}>
-                    <h4>{time}</h4>
+                    <div>
+                      <h4>{time}</h4>
+                    </div>
                     <AppointmentList>
                       {appointmentsAtTime.map((appointment: Appointment) => (
                         <AppointmentCard
