@@ -100,7 +100,7 @@ const ScheduleForm: React.FC = () => {
         </div>
       );
       resetForm();
-      localStorage.removeItem("formData"); // Clear the saved form data on successful submit
+      localStorage.removeItem("formData");
     } catch (error) {
       console.error("Error scheduling appointment:", error);
       if (axios.isAxiosError(error)) {
