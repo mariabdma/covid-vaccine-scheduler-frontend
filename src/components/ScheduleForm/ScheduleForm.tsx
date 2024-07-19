@@ -29,8 +29,8 @@ const validationSchema = Yup.object({
 
 const initialValues = {
   name: "",
-  birthDate: null,
-  scheduleDate: null,
+  birthDate: null as Date | null,
+  scheduleDate: null as Date | null,
   scheduleTime: "",
 };
 
@@ -44,6 +44,34 @@ const ScheduleForm: React.FC = () => {
   >([]);
   const [loadingHours, setLoadingHours] = useState<boolean>(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
+  const saveFormData = (formData: FormValues) => {
+    localStorage.setItem(
+      "formData",
+      JSON.stringify({
+        ...formData,
+        birthDate: formData.birthDate ? formData.birthDate.toISOString() : null,
+        scheduleDate: formData.scheduleDate
+          ? formData.scheduleDate.toISOString()
+          : null,
+      })
+    );
+  };
+
+  const loadFormData = (): FormValues => {
+    const savedFormData = localStorage.getItem("formData");
+    if (savedFormData) {
+      const parsedData = JSON.parse(savedFormData);
+      return {
+        ...parsedData,
+        birthDate: parsedData.birthDate ? new Date(parsedData.birthDate) : null,
+        scheduleDate: parsedData.scheduleDate
+          ? new Date(parsedData.scheduleDate)
+          : null,
+      };
+    }
+    return initialValues;
+  };
 
   const handleSubmit = async (
     values: FormValues,
@@ -60,7 +88,7 @@ const ScheduleForm: React.FC = () => {
     console.log("Form values:", formattedValues);
 
     try {
-      await scheduleAppointment(formattedValues);
+      const response = await scheduleAppointment(formattedValues);
       console.log("Appointment scheduled successfully");
       showPopup(
         <div>
@@ -72,6 +100,7 @@ const ScheduleForm: React.FC = () => {
         </div>
       );
       resetForm();
+      localStorage.removeItem("formData"); // Clear the saved form data on successful submit
     } catch (error) {
       console.error("Error scheduling appointment:", error);
       if (axios.isAxiosError(error)) {
@@ -126,7 +155,7 @@ const ScheduleForm: React.FC = () => {
 
   return (
     <Formik
-      initialValues={initialValues}
+      initialValues={loadFormData()}
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
@@ -134,14 +163,26 @@ const ScheduleForm: React.FC = () => {
         <Form>
           <FormField>
             <label htmlFor="name">Nome:</label>
-            <Field type="text" id="name" name="name" />
+            <Field
+              type="text"
+              id="name"
+              name="name"
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setFieldValue("name", e.target.value);
+                saveFormData({ ...values, name: e.target.value });
+              }}
+              value={values.name}
+            />
             <ErrorMessage name="name" component={ErrorText} />
           </FormField>
 
           <FormField>
             <BirthDatePicker
               value={values.birthDate}
-              onChange={(date: Date | null) => setFieldValue("birthDate", date)}
+              onChange={(date: Date | null) => {
+                setFieldValue("birthDate", date);
+                saveFormData({ ...values, birthDate: date });
+              }}
             />
             <ErrorMessage name="birthDate" component={ErrorText} />
           </FormField>
@@ -156,6 +197,7 @@ const ScheduleForm: React.FC = () => {
                   onChange={(date) => {
                     form.setFieldValue(field.name, date);
                     setSelectedDate(date);
+                    saveFormData({ ...values, scheduleDate: date });
                   }}
                   dateFormat="dd/MM/yyyy"
                   placeholderText="Selecione a data"
@@ -169,7 +211,15 @@ const ScheduleForm: React.FC = () => {
           {values.scheduleDate && (
             <FormField>
               <label htmlFor="scheduleTime">Hora do Agendamento:</label>
-              <Field as="select" name="scheduleTime">
+              <Field
+                as="select"
+                name="scheduleTime"
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                  setFieldValue("scheduleTime", e.target.value);
+                  saveFormData({ ...values, scheduleTime: e.target.value });
+                }}
+                value={values.scheduleTime}
+              >
                 <option value="">Selecione um horário</option>
                 {availableHours
                   .filter(({ count }) => count < 2)
