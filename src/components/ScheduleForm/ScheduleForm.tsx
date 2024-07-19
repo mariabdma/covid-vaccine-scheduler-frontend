@@ -17,7 +17,7 @@ const validationSchema = Yup.object({
   name: Yup.string()
     .required("Nome é obrigatório")
     .min(5, "Nome muito curto, utilize mais de 5 caracteres")
-    .matches(/^[a-zA-Z ]+$/, "Uso de caracteres não permitidos"),
+    .matches(/^[a-zA-ZÀ-ÿ\s]+$/, "Uso de caracteres não permitidos"),
   birthDate: Yup.date()
     .required("Data de nascimento é obrigatória")
     .max(today, "Data de nascimento inválida"),
