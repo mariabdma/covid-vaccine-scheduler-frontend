@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import DatePicker from "react-datepicker";
@@ -6,8 +6,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import { scheduleAppointment, fetchAvailableHours } from "../../services/api";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { ErrorText } from "./styles";
-import { BirthDatePicker } from "../"; // Updated import to match file name
+import { ErrorText, FormField, StyledButton } from "./styles";
+import { BirthDatePicker } from "../";
 import { usePopup } from "../../contexts/PopupContext";
 
 const today = new Date();
@@ -34,6 +34,8 @@ const initialValues = {
   scheduleTime: "",
 };
 
+type FormValues = typeof initialValues;
+
 const ScheduleForm: React.FC = () => {
   const { showPopup } = usePopup();
   const navigate = useNavigate();
@@ -44,18 +46,21 @@ const ScheduleForm: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   const handleSubmit = async (
-    values: any,
+    values: FormValues,
     { setSubmitting, resetForm }: any
   ) => {
-    values.birthDate = values.birthDate ? new Date(values.birthDate) : null;
-    values.scheduleDate = values.scheduleDate
-      ? new Date(values.scheduleDate).toISOString().split("T")[0]
-      : null;
+    const formattedValues = {
+      ...values,
+      birthDate: values.birthDate ? new Date(values.birthDate) : null,
+      scheduleDate: values.scheduleDate
+        ? new Date(values.scheduleDate).toISOString().split("T")[0]
+        : null,
+    };
 
-    console.log("Form values:", values);
+    console.log("Form values:", formattedValues);
 
     try {
-      await scheduleAppointment(values);
+      await scheduleAppointment(formattedValues);
       console.log("Appointment scheduled successfully");
       showPopup(
         <div>
@@ -63,9 +68,6 @@ const ScheduleForm: React.FC = () => {
           <p>Agendamento realizado com sucesso!</p>
           <button onClick={() => navigate("/")}>
             Voltar para a página inicial
-          </button>
-          <button onClick={() => navigate("/schedule")}>
-            Realizar outro agendamento
           </button>
         </div>
       );
@@ -95,8 +97,8 @@ const ScheduleForm: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchHours = async (date: Date | null) => {
+  const fetchHours = useCallback(
+    async (date: Date | null) => {
       if (date) {
         setLoadingHours(true);
         try {
@@ -114,10 +116,13 @@ const ScheduleForm: React.FC = () => {
           setLoadingHours(false);
         }
       }
-    };
+    },
+    [showPopup]
+  );
 
+  useEffect(() => {
     fetchHours(selectedDate);
-  }, [selectedDate]);
+  }, [selectedDate, fetchHours]);
 
   return (
     <Formik
@@ -125,23 +130,23 @@ const ScheduleForm: React.FC = () => {
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
-      {({ isSubmitting, setFieldValue, isValid, values, resetForm }) => (
+      {({ isSubmitting, setFieldValue, isValid, values }) => (
         <Form>
-          <div>
+          <FormField>
             <label htmlFor="name">Nome:</label>
             <Field type="text" id="name" name="name" />
             <ErrorMessage name="name" component={ErrorText} />
-          </div>
+          </FormField>
 
-          <div>
+          <FormField>
             <BirthDatePicker
               value={values.birthDate}
               onChange={(date: Date | null) => setFieldValue("birthDate", date)}
             />
             <ErrorMessage name="birthDate" component={ErrorText} />
-          </div>
+          </FormField>
 
-          <div>
+          <FormField>
             <label htmlFor="scheduleDate">Data do Agendamento:</label>
             <Field name="scheduleDate">
               {({ field, form }: any) => (
@@ -150,7 +155,7 @@ const ScheduleForm: React.FC = () => {
                   selected={field.value}
                   onChange={(date) => {
                     form.setFieldValue(field.name, date);
-                    setSelectedDate(date); // Update selectedDate state
+                    setSelectedDate(date);
                   }}
                   dateFormat="dd/MM/yyyy"
                   placeholderText="Selecione a data"
@@ -159,15 +164,15 @@ const ScheduleForm: React.FC = () => {
               )}
             </Field>
             <ErrorMessage name="scheduleDate" component={ErrorText} />
-          </div>
+          </FormField>
 
           {values.scheduleDate && (
-            <div>
+            <FormField>
               <label htmlFor="scheduleTime">Hora do Agendamento:</label>
               <Field as="select" name="scheduleTime">
                 <option value="">Selecione um horário</option>
                 {availableHours
-                  .filter(({ count }) => count < 2) // Only include available hours
+                  .filter(({ count }) => count < 2)
                   .map(({ hour }) => (
                     <option key={hour} value={hour}>
                       {hour}
@@ -175,17 +180,17 @@ const ScheduleForm: React.FC = () => {
                   ))}
               </Field>
               <ErrorMessage name="scheduleTime" component={ErrorText} />
-            </div>
+            </FormField>
           )}
 
-          <button
+          <StyledButton
             type="submit"
             disabled={
               isSubmitting || !isValid || !values.scheduleTime || loadingHours
             }
           >
             {isSubmitting ? "Aguarde..." : "Agendar"}
-          </button>
+          </StyledButton>
           {loadingHours && <p>Carregando horários disponíveis...</p>}
         </Form>
       )}

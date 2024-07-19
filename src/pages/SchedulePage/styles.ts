@@ -6,11 +6,12 @@ export const Container = styled.div`
   align-items: center;
   justify-content: flex-start;
   height: 100vh;
-  background-color: #f9f9f9;
-  padding: 50px 10px;
+  padding: 20px 10px;
+  box-sizing: border-box;
 `;
 
 export const SchedulerTitle = styled.h1`
-  font-size: 20px;
+  font-size: 22px;
+  font-weight: 500;
   margin-bottom: 20px;
 `;

@@ -5,12 +5,20 @@ import { ButtonContainer, ButtonText } from "./styles";
 interface HomeButtonProps {
   to: string;
   children: React.ReactNode;
+  bgColor?: string;
+  textColor?: string;
 }
-const HomeButton: React.FC<HomeButtonProps> = ({ to, children }) => {
+
+const HomeButton: React.FC<HomeButtonProps> = ({
+  to,
+  children,
+  bgColor,
+  textColor,
+}) => {
   return (
     <Link to={to}>
-      <ButtonContainer>
-        <ButtonText>{children}</ButtonText>
+      <ButtonContainer bgColor={bgColor}>
+        <ButtonText textColor={textColor}>{children}</ButtonText>
       </ButtonContainer>
     </Link>
   );

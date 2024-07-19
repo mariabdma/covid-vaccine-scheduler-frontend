@@ -6,6 +6,7 @@ export const AppointmentItem = styled.li`
   padding: 10px;
   margin-bottom: 10px;
   border-radius: 4px;
+  width: 100%;
 `;
 
 export const AppointmentDetails = styled.div`
