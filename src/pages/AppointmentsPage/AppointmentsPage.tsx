@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, ChangeEvent } from "react";
 import {
   Container,
   Header,
@@ -7,6 +7,7 @@ import {
   AppointmentList,
   AppointmentDateGroup,
   AppointmentTimeGroup,
+  SearchBar,
 } from "./styles";
 import { getAppointments } from "../../services/api";
 import { format, parseISO } from "date-fns";
@@ -19,6 +20,7 @@ interface Appointment {
   birthDate: string;
   scheduleDate: string;
   scheduleTime: string;
+  completed?: boolean;
 }
 
 interface GroupedAppointments {
@@ -31,6 +33,7 @@ interface GroupedAppointments {
 
 const AppointmentsPage: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -57,45 +60,66 @@ const AppointmentsPage: React.FC = () => {
     fetchAppointments();
   }, []);
 
+  const handleStatusChange = (id: number, status: boolean) => {
+    setAppointments((prevAppointments) =>
+      prevAppointments.map((appointment) =>
+        appointment.id === id
+          ? { ...appointment, completed: status }
+          : appointment
+      )
+    );
+  };
+
   const capitalizeFirstLetter = (string: string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
   };
 
   const groupAppointmentsByDateAndTime = (): GroupedAppointments => {
-    return appointments.reduce((acc: GroupedAppointments, appointment) => {
-      const date = capitalizeFirstLetter(
-        format(parseISO(appointment.scheduleDate), "MMMM", {
-          locale: ptBR,
-        })
-      );
-      const day = capitalizeFirstLetter(
-        format(parseISO(appointment.scheduleDate), "EEEE, d 'de' MMMM", {
-          locale: ptBR,
-        })
-      );
-      const appointmentDateTime = new Date(
-        `${appointment.scheduleDate}T${appointment.scheduleTime}`
-      );
-      const time = format(appointmentDateTime, "HH:mm");
+    const filteredAppointments = appointments.filter((appointment) =>
+      appointment.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
-      if (!acc[date]) {
-        acc[date] = {};
-      }
+    return filteredAppointments.reduce(
+      (acc: GroupedAppointments, appointment) => {
+        const date = capitalizeFirstLetter(
+          format(parseISO(appointment.scheduleDate), "MMMM", {
+            locale: ptBR,
+          })
+        );
+        const day = capitalizeFirstLetter(
+          format(parseISO(appointment.scheduleDate), "EEEE, d 'de' MMMM", {
+            locale: ptBR,
+          })
+        );
+        const appointmentDateTime = new Date(
+          `${appointment.scheduleDate}T${appointment.scheduleTime}`
+        );
+        const time = format(appointmentDateTime, "HH:mm");
 
-      if (!acc[date][day]) {
-        acc[date][day] = {};
-      }
+        if (!acc[date]) {
+          acc[date] = {};
+        }
 
-      if (!acc[date][day][time]) {
-        acc[date][day][time] = [];
-      }
+        if (!acc[date][day]) {
+          acc[date][day] = {};
+        }
 
-      acc[date][day][time].push(appointment);
-      return acc;
-    }, {});
+        if (!acc[date][day][time]) {
+          acc[date][day][time] = [];
+        }
+
+        acc[date][day][time].push(appointment);
+        return acc;
+      },
+      {}
+    );
   };
 
   const groupedAppointments = groupAppointmentsByDateAndTime();
+
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
 
   if (error) {
     return <div>{error}</div>;
@@ -107,6 +131,12 @@ const AppointmentsPage: React.FC = () => {
         <Title>Agendamentos para vacinação de Covid 19</Title>
       </Header>
       <Content>
+        <SearchBar
+          type="text"
+          placeholder="Buscar por nome"
+          value={searchTerm}
+          onChange={handleSearchChange}
+        />
         {Object.entries(groupedAppointments).map(([month, days]) => (
           <React.Fragment key={month}>
             <h2>{month}</h2>
@@ -123,6 +153,7 @@ const AppointmentsPage: React.FC = () => {
                         <AppointmentCard
                           key={appointment.id}
                           appointment={appointment}
+                          onStatusChange={handleStatusChange}
                         />
                       ))}
                     </AppointmentList>

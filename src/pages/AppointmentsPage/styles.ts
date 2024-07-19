@@ -10,7 +10,6 @@ export const Container = styled.div`
 `;
 
 export const Header = styled.header`
-  background: #f5f5f5;
   padding: 20px;
   border-bottom: 1px solid #ddd;
   position: sticky;
@@ -52,4 +51,11 @@ export const AppointmentList = styled.div`
   gap: 10px;
   flex: 1;
   margin: 0;
+`;
+
+export const SearchBar = styled.input`
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 `;
